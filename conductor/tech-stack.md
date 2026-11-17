@@ -19,7 +19,7 @@
 - **API Documentation & Contracts:** SpringDoc OpenAPI 3 (`swagger-ui` / `/v3/api-docs`).
 - **Backend Testing (Single-Run TDD):**
   - JUnit 5 (`jupiter`), AssertJ, Mockito, and Spring Boot `MockMvc` / `RestTestClient`.
-  - Database integration tests backed by Testcontainers PostgreSQL (with H2 PostgreSQL-mode fallback where Docker is unavailable in sandboxed environments).
+  - Database integration tests backed strictly by **Docker Testcontainers PostgreSQL** (`org.testcontainers:postgresql` + `@ServiceConnection`).
 
 ## 3. Frontend Stack (`frontend/`)
 - **Language:** TypeScript 5.x (strict mode enabled).
@@ -34,4 +34,4 @@
 
 ## 4. Infrastructure & Local Development
 - **Database Containerization:** `docker-compose.yml` providing PostgreSQL 16 for local development.
-- **Build & Package Management:** Maven (`./mvnw`) or Gradle (`./gradlew`) for `backend/`; `npm` / `pnpm` for `frontend/`.
+- **Build & Package Management:** **Gradle** (`./gradlew`, `build.gradle`) for `backend/`; `npm` for `frontend/`.

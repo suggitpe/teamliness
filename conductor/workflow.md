@@ -13,9 +13,9 @@
 4.  **High Code Coverage:** Aim for >80% code coverage for all modules
 5.  **User Experience First:** Every decision should prioritize user experience
 6.  **Non-Interactive & CI-Aware (Single-Run Mode Only):** All test and linter executions
-    MUST run in single-run mode with **no watch flags** (e.g., `./mvnw test` for the
-    Spring Boot backend, and `npx vitest run` or `CI=true npm test -- --run` for the
-    React SPA frontend).
+    MUST run in single-run mode with **no watch flags** (e.g., `./gradlew test` for the
+    Spring Boot backend using Docker Testcontainers PostgreSQL, and `npx vitest run` or
+    `CI=true npm test -- --run` for the React SPA frontend).
 
 ## Task Workflow
 
@@ -36,7 +36,7 @@ All tasks follow a strict lifecycle:
         and acceptance criteria for the task (including domain rules such as >100%
         over-allocation soft-warning flags, inactive Workday leaver handling, and
         idempotent `WorkdayDirectoryPort` sync).
-    -   **CRITICAL:** Run the tests in single-run mode (`./mvnw test` or `npx vitest run`)
+    -   **CRITICAL:** Run the tests in single-run mode (`./gradlew test` or `npx vitest run`)
         and confirm that they fail as expected. This is the "Red" phase of TDD.
         Do not proceed until you have failing tests.
 
@@ -55,7 +55,7 @@ All tasks follow a strict lifecycle:
     -   Rerun tests in single-run mode to ensure they still pass after refactoring.
 
 6.  **Verify Coverage:** Run coverage reports using the project's chosen tools:
-    -   **Backend (Spring Boot / JaCoCo):** `./mvnw test jacoco:report`
+    -   **Backend (Spring Boot / Gradle / JaCoCo):** `./gradlew test jacocoTestReport`
     -   **Frontend (React / Vitest):** `npx vitest run --coverage`
     Target: >80% coverage for new code.
 
@@ -150,7 +150,7 @@ that also concludes a phase in `plan.md`.
     -   Before execution, you **must** announce the exact shell command you will
         use to run the tests (always single-run, no watch flags).
     -   **Example Announcement:** "I will now run the automated test suite to
-        verify the phase. **Command:** `cd backend && ./mvnw test && cd ../frontend && npx vitest run`"
+        verify the phase. **Command:** `cd backend && ./gradlew test && cd ../frontend && npx vitest run`"
     -   Execute the announced command.
     -   If tests fail, you **must** inform the user and begin debugging. You may
         attempt to propose a fix a **maximum of two times**. If the tests still
@@ -182,7 +182,7 @@ that also concludes a phase in `plan.md`.
         The automated tests have passed. For manual verification, please follow these steps:
 
         **Manual Verification Steps:**
-        1. **Ensure the backend server is running:** `cd backend && ./mvnw spring-boot:run`
+        1. **Ensure the backend server is running:** `cd backend && ./gradlew bootRun`
         2. **Execute the following command in your terminal:** `curl -X GET http://localhost:8080/api/v1/integrations/jira/teams`
         3. **Confirm that you receive:** A JSON response with a status of `200 OK` listing active teams and their Jira project mappings.
         ```
@@ -248,8 +248,8 @@ Before marking any task complete, verify:
 # Start local PostgreSQL database
 docker compose up -d
 
-# Backend setup & dependency resolution
-cd backend && ./mvnw test-compile
+# Backend setup & test compilation (Gradle)
+cd backend && ./gradlew testClasses
 
 # Frontend dependency installation
 cd frontend && npm install
@@ -258,11 +258,11 @@ cd frontend && npm install
 ### Daily Development
 
 ```bash
-# Start Backend API (Spring Boot)
-cd backend && ./mvnw spring-boot:run
+# Start Backend API (Spring Boot via Gradle)
+cd backend && ./gradlew bootRun
 
-# Run Backend Tests (Single-run mode, no watch)
-cd backend && ./mvnw test
+# Run Backend Tests (Single-run mode with Docker Testcontainers, no watch)
+cd backend && ./gradlew test
 
 # Start Frontend SPA (Vite)
 cd frontend && npm run dev
@@ -274,8 +274,8 @@ cd frontend && npx vitest run
 ### Before Committing
 
 ```bash
-# Backend full verification & coverage
-cd backend && ./mvnw verify
+# Backend full verification & JaCoCo coverage
+cd backend && ./gradlew check jacocoTestReport
 
 # Frontend type-check, lint, and single-run tests
 cd frontend && npm run lint && npm run build && npx vitest run --coverage
