@@ -5,17 +5,41 @@
 1.  **The Plan is the Source of Truth:** All work must be tracked in `plan.md`
 2.  **The Tech Stack is Deliberate:** Changes to the tech stack must be
     documented in `tech-stack.md` *before* implementation
-3.  **Test-Driven Development:** Write unit and integration tests before implementing
-    functionality. Every domain rule (e.g., over-allocation >100% soft warning calculation,
-    inactive Workday leaver handling & flagging, idempotent Workday sync upserts,
-    skill assignment validation, and Jira team directory payload contract) MUST have
-    automated tests written first in Red-Green-Refactor order.
-4.  **High Code Coverage:** Aim for >80% code coverage for all modules
-5.  **User Experience First:** Every decision should prioritize user experience
-6.  **Non-Interactive & CI-Aware (Single-Run Mode Only):** All test and linter executions
+3.  **Acceptance Test-Driven Development (ATDD / Specification by Example) & TDD:**
+    -   Every micro-track begins by authoring executable **Gherkin `.feature` Specifications by Example** (with concrete business rules and `Examples:` tables) that compile into **HTML Living Documentation** (`backend/build/reports/living-docs/index.html` and `frontend/reports/living-docs/index.html`).
+    -   Write ATDD acceptance tests and unit/integration tests before implementing functionality in strict Red-Green-Refactor order.
+4.  **Human-in-the-Loop (HITL) First & Micro-Scoped Tracks:**
+    -   Work is broken into small, vertical-slice micro-tracks so the human remains tightly in the loop.
+    -   Every micro-track enforces a **Two-Stage HITL Gate Protocol**:
+        1.  **HITL Gate 1 (Specification by Example Sign-Off — Before Implementation):** Draft the Gherkin `.feature` scenarios and example tables, present them to the user, and **PAUSE for explicit user approval** before writing implementation code.
+        2.  **HITL Gate 2 (HTML Living Documentation & Feature Sign-Off — Track Completion):** Execute the single-run test suites to generate the **HTML Living Documentation report**, present the clickable `file://` link to the HTML report alongside manual verification steps, and **PAUSE for explicit user sign-off** before closing the track.
+5.  **High Code Coverage:** Aim for >80% code coverage for all modules
+6.  **User Experience First:** Every decision should prioritize user experience (adhering to the Glassmorphic design system)
+7.  **Non-Interactive & CI-Aware (Single-Run Mode Only):** All test, ATDD living-doc, and linter executions
     MUST run in single-run mode with **no watch flags** (e.g., `./gradlew test` for the
-    Spring Boot backend using Docker Testcontainers PostgreSQL, and `npx vitest run` or
-    `CI=true npm test -- --run` for the React SPA frontend).
+    Spring Boot backend using Docker Testcontainers PostgreSQL + Cucumber-JVM HTML reports, and `npx vitest run` for the React SPA frontend).
+
+## Two-Stage Human-in-the-Loop (HITL) & ATDD Living Documentation Protocol
+
+Every micro-track follows this two-stage Human-in-the-Loop lifecycle:
+
+### Stage 1: Specification by Example Authoring & HITL Gate 1 (Red Phase)
+1.  **Author Gherkin `.feature` Specification:** Create or update the human-readable `.feature` file(s) (`backend/src/test/resources/features/...` and/or `frontend/src/features/...`) containing:
+    -   Feature narrative and business context
+    -   Explicit `Rule:` blocks and `Scenario` / `Scenario Outline` definitions with concrete `Examples:` data tables
+2.  **HITL Gate 1 (Specification Approval):**
+    -   Present the drafted Specification by Example scenarios and example tables to the user (using `ask_question` when available).
+    -   **PAUSE** and await explicit human approval or refinements before writing step definitions and production implementation code.
+3.  **Implement Failing Step Definitions (ATDD Red Phase):** Wire the step definitions and run in single-run mode (`./gradlew test` / `npx vitest run`) to confirm the new acceptance scenarios fail as expected.
+
+### Stage 2: Implementation, HTML Living Documentation Generation & HITL Gate 2 (Green Phase & Checkpoint)
+1.  **Implement & Pass Unit + ATDD Tests (Green Phase):** Implement the domain, persistence, API, or Glassmorphic UI slice using inner-loop TDD until all unit tests and Gherkin ATDD scenarios pass.
+2.  **Generate HTML Living Documentation:**
+    -   Backend: `./gradlew test` generates the formatted HTML Living Documentation at `backend/build/reports/living-docs/index.html` (Cucumber/Masterthought/Serenity HTML report).
+    -   Frontend: `npx vitest run` generates the formatted HTML Living Documentation at `frontend/reports/living-docs/index.html`.
+3.  **HITL Gate 2 (Living Documentation & Feature Sign-Off):**
+    -   Provide the user with direct clickable links to the generated **HTML Living Documentation (`index.html`)** files and step-by-step manual verification instructions.
+    -   **PAUSE** and await explicit human confirmation before recording the phase/track checkpoint and advancing to the next micro-track.
 
 ## Task Workflow
 
@@ -296,10 +320,13 @@ Every core domain rule MUST be covered by dedicated unit and integration tests e
 3.  **Inactive Workday Leaver Handling on Teams & Outcomes:**
     -   Active memberships and outcome contributions linked to an `Inactive` Workday employee are automatically flagged with a leaver warning indicator.
     -   One-click offboarding/reassignment closes active memberships (`end_date`) without deleting historical allocation records.
-4.  **Direct Skill Validation & RBAC Personas:**
+4.  **Direct Skill Validation, Team-Level Skill Aggregation & RBAC Personas:**
     -   Skills assigned by `Admin`, `Org Leader`, or `Team Lead` are persisted as validated with proficiency ratings (`Beginner`, `Intermediate`, `Expert`).
+    -   Team-level skill aggregation accurately rolls up active members' skills by skill and category (`coverageCount`, `maxProficiency`, `averageProficiencyScore`, and skill growth / bench depth indicators) so leaders can select teams for Outcomes based on capability or skill growth.
     -   RBAC enforcement across `Admin`, `Org Leader`, `Team Lead`, and `Read-Only Viewer`.
-5.  **Jira Canonical Team Directory Contract:**
+5.  **Organisational & Capacity Health Diagnostics Suite:**
+    -   Accurately detects and categorizes: (a) Unallocated (`0%`) & Under-Allocated (`<100%`) active employees, (b) Over-Allocated (`>100%`) & High Team Fragmentation (`>2` concurrent active teams) employees, (c) Active Workday Leavers (`Inactive`) still on active teams/outcomes & Teams missing a designated `Team Lead`, and (d) Outcome Coverage Gaps (active outcomes with zero committed teams or contributors).
+6.  **Jira Canonical Team Directory Contract:**
     -   Read-only integration endpoint returns active teams, org unit hierarchy, leads, members, and Jira Project Key mappings.
 
 ### Unit Testing
@@ -424,26 +451,30 @@ A task is complete when:
 4.  Notify affected users (if any)
 5.  Document and update security procedures
 
-## Deployment Workflow
+## Deployment Workflow (Google Cloud Platform — Cloud Run & Cloud SQL)
 
 ### Pre-Deployment Checklist
 
--   [ ] All backend and frontend tests passing in single-run mode
+-   [ ] All backend and frontend tests passing in single-run mode (`./gradlew test`, `npx vitest run`)
 -   [ ] Coverage >80%
 -   [ ] No linting or type errors
--   [ ] Environment variables configured
--   [ ] Flyway database migrations verified
--   [ ] Database backup created
+-   [ ] Multi-stage `backend/Dockerfile` and `frontend/Dockerfile` build cleanly
+-   [ ] GCP Workload Identity Federation, Artifact Registry, Cloud SQL instance, and Secret Manager variables configured
+-   [ ] Flyway database migrations verified against PostgreSQL 16
+-   [ ] Cloud SQL automated backup verified
 
-### Deployment Steps
+### Automated Push & Continuous Deployment Steps (Cloud Build & GitHub Actions)
 
-1.  Merge feature branch to main
-2.  Tag release with version
-3.  Push to deployment service
-4.  Verify Flyway database migrations execute cleanly
-5.  Verify deployment health check
-6.  Test critical paths (Workday sync, Team composition, Jira endpoint)
-7.  Monitor for errors
+1.  Merge feature branch or push to `main`
+2.  **CI/CD Trigger (`.github/workflows/deploy-gcp.yml` or `cloudbuild.yaml`):**
+    -   Executes single-run backend (`./gradlew test`) and frontend (`npx vitest run`) test suites
+    -   Builds and tags multi-stage container images for `teamliness-backend` and `teamliness-frontend`
+    -   Pushes images to Google Artifact Registry (`<region>-docker.pkg.dev/<project-id>/teamliness/...`)
+    -   Deploys `teamliness-backend` to **Google Cloud Run** attached to **Cloud SQL for PostgreSQL 16** (running Flyway migrations on startup)
+    -   Deploys `teamliness-frontend` to **Google Cloud Run** configured with the backend service URL
+3.  Verify Cloud Run revision health check (`/actuator/health`)
+4.  Test critical paths (Workday sync, Team composition, Team Skill Rollup, Diagnostics suite, Jira endpoint)
+5.  Monitor Cloud Run & Cloud SQL logs for errors
 
 ### Post-Deployment
 
