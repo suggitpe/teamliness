@@ -79,6 +79,10 @@ export const WORKSPACE_SECTIONS: WorkspaceNavConfig[] = [
 export const RBAC_PERSONAS = ['Admin', 'Org Leader', 'Team Lead', 'Read-Only Viewer'] as const;
 export type RbacPersona = (typeof RBAC_PERSONAS)[number];
 
+function isRbacPersona(value: string): value is RbacPersona {
+  return RBAC_PERSONAS.some((persona) => persona === value);
+}
+
 /**
  * Glassmorphic Operational Workspace Shell for Teamliness.
  */
@@ -146,7 +150,11 @@ export function App(): React.ReactElement {
               <select
                 aria-label="Switch RBAC Persona"
                 value={activePersona}
-                onChange={(e) => setActivePersona(e.target.value as RbacPersona)}
+                onChange={(e) => {
+                  if (isRbacPersona(e.target.value)) {
+                    setActivePersona(e.target.value);
+                  }
+                }}
                 className="ml-1 bg-slate-800/90 text-xs text-slate-200 rounded border border-white/15 px-1.5 py-0.5"
               >
                 {RBAC_PERSONAS.map((persona) => (

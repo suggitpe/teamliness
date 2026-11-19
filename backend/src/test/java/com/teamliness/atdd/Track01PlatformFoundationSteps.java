@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,6 +22,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * Step definitions for {@code track_01_platform_foundation.feature}.
  */
 public class Track01PlatformFoundationSteps {
+
+    private static final Set<String> ALLOWED_TABLES = Set.of(
+            "org_units",
+            "roles_catalog",
+            "skills_catalog",
+            "persons",
+            "teams"
+    );
 
     @Autowired
     private MockMvc mockMvc;
@@ -83,9 +92,11 @@ public class Track01PlatformFoundationSteps {
 
     @When("the operator inspects the {string} table")
     public void theOperatorInspectsTheTable(String tableName) {
-        String sanitizedTable = tableName.replaceAll("[^a-zA-Z0-9_]", "");
+        if (!ALLOWED_TABLES.contains(tableName)) {
+            throw new IllegalArgumentException("Unexpected table name in specification: " + tableName);
+        }
         this.latestTableRowCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM " + sanitizedTable,
+                "SELECT COUNT(*) FROM " + tableName,
                 Integer.class
         );
     }
