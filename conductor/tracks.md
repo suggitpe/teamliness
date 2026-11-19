@@ -7,7 +7,7 @@
 
 ---
 
-- [~] **Track: Track 02 — Workday Directory Sync (`WorkdayDirectoryPort`) & Leaver Soft-Deactivation**
+- [x] **Track: Track 02 — Workday Directory Sync (`WorkdayDirectoryPort`) & Leaver Soft-Deactivation**
   *Link: [./tracks/track_02_workday_sync_leavers/index.md](./tracks/track_02_workday_sync_leavers/index.md)*
 
 ---

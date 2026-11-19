@@ -6,6 +6,7 @@ import {
   Building2,
   ExternalLink,
   Lock,
+  RefreshCw,
   ShieldCheck,
   Target,
   Users,
@@ -24,6 +25,90 @@ export interface WorkspaceNavConfig {
   subtitle: string;
   highlights: string[];
 }
+
+export interface WorkdayPersonDirectoryEntry {
+  employeeId: string;
+  fullName: string;
+  email: string;
+  jobTitle: string;
+  department: string;
+  costCentre: string;
+  managerEmployeeId: string | null;
+  employmentStatus: 'Active' | 'Inactive';
+}
+
+export const INITIAL_WORKDAY_DIRECTORY: WorkdayPersonDirectoryEntry[] = [
+  {
+    employeeId: 'WD-1001',
+    fullName: 'Elena Rostova',
+    email: 'elena.rostova@teamliness.io',
+    jobTitle: 'Principal Platform Architect',
+    department: 'Cloud & Platform Foundations',
+    costCentre: 'CC-4100',
+    managerEmployeeId: null,
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1002',
+    fullName: 'Marcus Vance',
+    email: 'marcus.vance@teamliness.io',
+    jobTitle: 'Lead Software Engineer',
+    department: 'Digital Payments & Experience',
+    costCentre: 'CC-4200',
+    managerEmployeeId: 'WD-1001',
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1003',
+    fullName: 'Priya Nair',
+    email: 'priya.nair@teamliness.io',
+    jobTitle: 'Senior Software Engineer',
+    department: 'Digital Payments & Experience',
+    costCentre: 'CC-4200',
+    managerEmployeeId: 'WD-1002',
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1004',
+    fullName: 'Devon Brooks',
+    email: 'devon.brooks@teamliness.io',
+    jobTitle: 'Staff Platform Engineer',
+    department: 'Cloud & Platform Foundations',
+    costCentre: 'CC-4100',
+    managerEmployeeId: 'WD-1001',
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1005',
+    fullName: 'Sofia Lindqvist',
+    email: 'sofia.lindqvist@teamliness.io',
+    jobTitle: 'Staff Data Engineer',
+    department: 'Cloud & Platform Foundations',
+    costCentre: 'CC-4100',
+    managerEmployeeId: 'WD-1001',
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1006',
+    fullName: "Liam O'Connor",
+    email: 'liam.oconnor@teamliness.io',
+    jobTitle: 'Senior Frontend Engineer',
+    department: 'Digital Payments & Experience',
+    costCentre: 'CC-4200',
+    managerEmployeeId: 'WD-1002',
+    employmentStatus: 'Active',
+  },
+  {
+    employeeId: 'WD-1099',
+    fullName: 'Arthur Pendelton',
+    email: 'arthur.pendelton@teamliness.io',
+    jobTitle: 'Former Staff Engineer',
+    department: 'Cloud & Platform Foundations',
+    costCentre: 'CC-4100',
+    managerEmployeeId: 'WD-1001',
+    employmentStatus: 'Inactive',
+  },
+];
 
 export const WORKSPACE_SECTIONS: WorkspaceNavConfig[] = [
   {
@@ -89,9 +174,23 @@ function isRbacPersona(value: string): value is RbacPersona {
 export function App(): React.ReactElement {
   const [activeSectionId, setActiveSectionId] = useState<WorkspaceSectionId>('team-composition');
   const [activePersona, setActivePersona] = useState<RbacPersona>('Org Leader');
+  const [workdaySyncStatus, setWorkdaySyncStatus] = useState<string>(
+    'Workday SoR: Connected (Schema v2)'
+  );
+  const [directoryEntries] = useState<WorkdayPersonDirectoryEntry[]>(INITIAL_WORKDAY_DIRECTORY);
 
   const currentSection =
     WORKSPACE_SECTIONS.find((section) => section.id === activeSectionId) ?? WORKSPACE_SECTIONS[0];
+
+  function handleTriggerWorkdaySync(): void {
+    setWorkdaySyncStatus('Last Sync: 6 Upserted • 1 Leaver Deactivated (MOCK)');
+    if (typeof fetch === 'function') {
+      void fetch('/api/v1/workday/sync', {
+        method: 'POST',
+        headers: { 'X-Teamliness-Persona': activePersona },
+      }).catch(() => undefined);
+    }
+  }
 
   return (
     <div
@@ -133,10 +232,24 @@ export function App(): React.ReactElement {
               <ExternalLink className="h-3 w-3 opacity-80" />
             </a>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-xs text-slate-200">
+            <div
+              data-testid="workday-sync-status-badge"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-xs text-slate-200"
+            >
               <Lock className="h-3.5 w-3.5 text-sky-300" />
-              <span>Workday SoR: Connected (Schema v2)</span>
+              <span>{workdaySyncStatus}</span>
             </div>
+
+            {activePersona === 'Admin' && (
+              <button
+                type="button"
+                onClick={handleTriggerWorkdaySync}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-100 text-xs font-semibold hover:bg-cyan-500/30 transition"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                <span>Sync Workday Directory</span>
+              </button>
+            )}
 
             <div className="flex items-center gap-2 bg-slate-900/70 border border-white/15 rounded-lg px-3 py-1.5">
               <ShieldCheck className="h-4 w-4 text-indigo-300" />
@@ -269,6 +382,81 @@ export function App(): React.ReactElement {
                 {highlight}
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Workday System-of-Record Employee Directory Projection Panel */}
+        <section
+          aria-label="Workday Employee Directory Projection"
+          className="bg-slate-900/55 backdrop-blur-xl border border-white/15 rounded-2xl p-6 shadow-xl shadow-black/25"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <span className="text-xs uppercase tracking-wider text-sky-300 font-semibold">
+                WorkdayDirectoryPort • Read-Only System-of-Record Projection
+              </span>
+              <h2 className="text-lg font-bold text-white mt-1">
+                Workday Employee Directory &amp; Leaver Status
+              </h2>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-200">
+              <Lock className="h-3 w-3" />
+              <span>Core HR Attributes Read-Only</span>
+            </span>
+          </div>
+
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-white/15 text-xs uppercase text-slate-400">
+                  <th className="py-3 px-3">Workday ID</th>
+                  <th className="py-3 px-3">Full Name</th>
+                  <th className="py-3 px-3">Job Title</th>
+                  <th className="py-3 px-3">Department &amp; Cost Centre</th>
+                  <th className="py-3 px-3">Employment Status</th>
+                  <th className="py-3 px-3">SoR Boundary</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {directoryEntries.map((person) => {
+                  const isLeaver = person.employmentStatus === 'Inactive';
+                  return (
+                    <tr
+                      key={person.employeeId}
+                      data-testid={`workday-person-row-${person.employeeId}`}
+                      className="bg-slate-900/75 hover:bg-white/5 transition"
+                    >
+                      <td className="py-3 px-3 font-mono text-xs text-cyan-300">
+                        {person.employeeId}
+                      </td>
+                      <td className="py-3 px-3 font-medium text-white">{person.fullName}</td>
+                      <td className="py-3 px-3 text-slate-300">{person.jobTitle}</td>
+                      <td className="py-3 px-3 text-slate-300">
+                        {person.department}{' '}
+                        <span className="text-xs text-slate-400">({person.costCentre})</span>
+                      </td>
+                      <td className="py-3 px-3">
+                        {isLeaver ? (
+                          <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-200">
+                            Workday Inactive / Leaver
+                          </span>
+                        ) : (
+                          <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200">
+                            Active
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="inline-flex items-center gap-1 text-xs text-slate-300 bg-white/5 border border-white/10 rounded-md px-2 py-0.5">
+                          <Lock className="h-3 w-3 text-sky-300" />
+                          <span>Synced from Workday</span>
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
       </main>

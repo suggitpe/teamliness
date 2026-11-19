@@ -84,8 +84,8 @@
       <h1>Teamliness Frontend — Specification by Example (ATDD) Living Documentation</h1>
       <p>Generated automatically from executable Gherkin specifications and single-run Vitest BDD verification.</p>
       <div class="summary-bar">
-        <div class="metric"><strong>Features:</strong> 1</div>
-        <div class="metric"><strong>Scenarios Passed:</strong> 6</div>
+        <div class="metric"><strong>Features:</strong> 2</div>
+        <div class="metric"><strong>Scenarios Passed:</strong> 10</div>
         <div class="metric"><strong>Scenarios Failed:</strong> 0</div>
       </div>
     </header>
@@ -119,6 +119,39 @@
         | Skill Matrix         | Individual &amp; Team-Aggregated Skill Matrix    |
         | Outcome Commitments  | Outcome Commitments &amp; Jira Execution Links   |
         | Health Diagnostics   | Organisational &amp; Capacity Health Diagnostics |
+</pre>
+        </section>
+
+        <section class="feature-card">
+          <div class="feature-header">
+            <span class="badge-spec">Gherkin Specification</span>
+            <h2>track_02_workday_sync_ui.feature</h2>
+          </div>
+          <pre class="gherkin-source">Feature: Track 02 — Glassmorphic Workday Sync Bar &amp; Read-Only System-of-Record Directory
+  As an Admin or Org Leader
+  I want to view the Workday System-of-Record synchronization status, inspect synced employee projections with read-only lock indicators, and trigger an on-demand Workday sync
+  So that I have immediate visibility into active employees and soft-deactivated Workday leavers.
+
+  Rule: The Glassmorphic header provides persona-aware on-demand Workday synchronization and audit feedback
+
+    Scenario: Admin triggers an on-demand Workday Directory Sync from the Glassmorphic workspace header
+      Given a leader opens the Teamliness SPA workspace
+      When the leader switches the active RBAC persona to "Admin"
+      And the Admin clicks the "Sync Workday Directory" button in the Glassmorphic header
+      Then the Workday Sync status badge displays "Last Sync: 6 Upserted • 1 Leaver Deactivated (MOCK)"
+
+  Rule: The Workday Employee Directory projection view displays read-only lock badges and semantic employment statuses
+
+    Scenario Outline: Workday Employee Directory rows render read-only System-of-Record indicators and employment status badges
+      Given a leader opens the Teamliness SPA workspace
+      When the leader views the Workday Employee Directory projection panel
+      Then the employee row for "&lt;employee_id&gt;" displays "&lt;full_name&gt;", "&lt;employment_status_badge&gt;", and the "Synced from Workday" read-only lock indicator
+
+      Examples:
+        | employee_id | full_name        | employment_status_badge     |
+        | WD-1001     | Elena Rostova    | Active                      |
+        | WD-1005     | Sofia Lindqvist  | Active                      |
+        | WD-1099     | Arthur Pendelton | Workday Inactive / Leaver   |
 </pre>
         </section>
     <section class="results-card">
@@ -176,6 +209,42 @@
 
         <tr>
           <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario Outline: Navigating to "'Health Diagnostics'" renders "'Organisational & Capacity Health Diag…'" with glassmorphic surface elevation</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 02 — Glassmorphic Workday Sync Bar & Read-Only System-of-Record Directory > Scenario: Admin triggers an on-demand Workday Directory Sync from the Glassmorphic workspace header</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 02 — Glassmorphic Workday Sync Bar & Read-Only System-of-Record Directory > Scenario Outline: Employee row "'WD-1001'" displays "'Elena Rostova'", "'Active'", and "Synced from Workday" read-only lock</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 02 — Glassmorphic Workday Sync Bar & Read-Only System-of-Record Directory > Scenario Outline: Employee row "'WD-1005'" displays "'Sofia Lindqvist'", "'Active'", and "Synced from Workday" read-only lock</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 02 — Glassmorphic Workday Sync Bar & Read-Only System-of-Record Directory > Scenario Outline: Employee row "'WD-1099'" displays "'Arthur Pendelton'", "'Workday Inactive / Leaver'", and "Synced from Workday" read-only lock</td>
           <td>
             <span class="status-pill status-pass">
               PASS
