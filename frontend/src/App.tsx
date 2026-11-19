@@ -4,6 +4,7 @@ import {
   Award,
   BookOpenCheck,
   Building2,
+  CheckCircle2,
   ExternalLink,
   Lock,
   RefreshCw,
@@ -36,6 +37,50 @@ export interface WorkdayPersonDirectoryEntry {
   managerEmployeeId: string | null;
   employmentStatus: 'Active' | 'Inactive';
 }
+
+export type SkillProficiencyTier = 'Beginner' | 'Intermediate' | 'Expert';
+
+export interface StandardizedSkillCatalogItem {
+  id: string;
+  displayName: string;
+  category: string;
+}
+
+export const STANDARDIZED_SKILLS: StandardizedSkillCatalogItem[] = [
+  { id: 'skill-java-spring', displayName: 'Java 21 & Spring Boot', category: 'Backend' },
+  { id: 'skill-postgres', displayName: 'PostgreSQL & Relational Modeling', category: 'Data & Analytics' },
+  { id: 'skill-react-ts', displayName: 'React 18 & TypeScript', category: 'Frontend' },
+  { id: 'skill-gcp-cloudrun', displayName: 'GCP Cloud Run & Cloud SQL', category: 'Cloud & DevOps' },
+  { id: 'skill-atdd-bdd', displayName: 'ATDD & Specification by Example', category: 'Product & Delivery' },
+  { id: 'skill-k8s-terraform', displayName: 'Terraform & Infrastructure as Code', category: 'Cloud & DevOps' },
+];
+
+export const PROFICIENCY_TIERS: SkillProficiencyTier[] = ['Beginner', 'Intermediate', 'Expert'];
+
+function isSkillProficiencyTier(value: string): value is SkillProficiencyTier {
+  return PROFICIENCY_TIERS.some((tier) => tier === value);
+}
+
+export type EmployeeSkillMap = Record<string, Array<{ skillName: string; proficiency: SkillProficiencyTier }>>;
+
+export const INITIAL_EMPLOYEE_SKILLS: EmployeeSkillMap = {
+  'Elena Rostova': [
+    { skillName: 'Java 21 & Spring Boot', proficiency: 'Expert' },
+    { skillName: 'GCP Cloud Run & Cloud SQL', proficiency: 'Expert' },
+  ],
+  'Marcus Vance': [
+    { skillName: 'Java 21 & Spring Boot', proficiency: 'Expert' },
+    { skillName: 'React 18 & TypeScript', proficiency: 'Intermediate' },
+  ],
+  'Priya Nair': [
+    { skillName: 'React 18 & TypeScript', proficiency: 'Expert' },
+    { skillName: 'PostgreSQL & Relational Modeling', proficiency: 'Intermediate' },
+  ],
+  'Devon Brooks': [
+    { skillName: 'GCP Cloud Run & Cloud SQL', proficiency: 'Expert' },
+    { skillName: 'Terraform & Infrastructure as Code', proficiency: 'Expert' },
+  ],
+};
 
 export const INITIAL_WORKDAY_DIRECTORY: WorkdayPersonDirectoryEntry[] = [
   {
@@ -178,9 +223,15 @@ export function App(): React.ReactElement {
     'Workday SoR: Connected (Schema v2)'
   );
   const [directoryEntries] = useState<WorkdayPersonDirectoryEntry[]>(INITIAL_WORKDAY_DIRECTORY);
+  const [employeeSkills, setEmployeeSkills] = useState<EmployeeSkillMap>(INITIAL_EMPLOYEE_SKILLS);
+  const [selectedPersonName, setSelectedPersonName] = useState<string>('Elena Rostova');
+  const [selectedSkillName, setSelectedSkillName] = useState<string>('Java 21 & Spring Boot');
+  const [selectedProficiency, setSelectedProficiency] = useState<SkillProficiencyTier>('Expert');
 
   const currentSection =
     WORKSPACE_SECTIONS.find((section) => section.id === activeSectionId) ?? WORKSPACE_SECTIONS[0];
+
+  const canAssignSkills = activePersona !== 'Read-Only Viewer';
 
   function handleTriggerWorkdaySync(): void {
     setWorkdaySyncStatus('Last Sync: 6 Upserted • 1 Leaver Deactivated (MOCK)');
@@ -190,6 +241,23 @@ export function App(): React.ReactElement {
         headers: { 'X-Teamliness-Persona': activePersona },
       }).catch(() => undefined);
     }
+  }
+
+  function handleAssignValidatedSkill(): void {
+    if (!canAssignSkills) {
+      return;
+    }
+    setEmployeeSkills((prev) => {
+      const existing = prev[selectedPersonName] ?? [];
+      const filtered = existing.filter((item) => item.skillName !== selectedSkillName);
+      return {
+        ...prev,
+        [selectedPersonName]: [
+          ...filtered,
+          { skillName: selectedSkillName, proficiency: selectedProficiency },
+        ],
+      };
+    });
   }
 
   return (
@@ -383,6 +451,153 @@ export function App(): React.ReactElement {
               </div>
             ))}
           </div>
+
+          {/* Track 03: Individual Validated Skill Matrix & Direct Assignment Bar */}
+          {activeSectionId === 'skill-matrix' && (
+            <div className="mt-6 pt-6 border-t border-white/15 flex flex-col gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-4 flex flex-wrap items-end justify-between gap-4">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <label
+                      htmlFor="skill-person-select"
+                      className="block text-xs text-slate-300 mb-1"
+                    >
+                      Select Employee for Skill Tagging
+                    </label>
+                    <select
+                      id="skill-person-select"
+                      aria-label="Select Employee for Skill Tagging"
+                      value={selectedPersonName}
+                      onChange={(e) => setSelectedPersonName(e.target.value)}
+                      className="bg-slate-900/80 text-xs text-white rounded-lg border border-white/15 px-3 py-2"
+                    >
+                      {directoryEntries
+                        .filter((p) => p.employmentStatus === 'Active')
+                        .map((person) => (
+                          <option key={person.employeeId} value={person.fullName}>
+                            {person.fullName}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="standardized-skill-select"
+                      className="block text-xs text-slate-300 mb-1"
+                    >
+                      Select Standardized Skill
+                    </label>
+                    <select
+                      id="standardized-skill-select"
+                      aria-label="Select Standardized Skill"
+                      value={selectedSkillName}
+                      onChange={(e) => setSelectedSkillName(e.target.value)}
+                      className="bg-slate-900/80 text-xs text-white rounded-lg border border-white/15 px-3 py-2"
+                    >
+                      {STANDARDIZED_SKILLS.map((skill) => (
+                        <option key={skill.id} value={skill.displayName}>
+                          {skill.displayName} ({skill.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="proficiency-tier-select"
+                      className="block text-xs text-slate-300 mb-1"
+                    >
+                      Select Proficiency Tier
+                    </label>
+                    <select
+                      id="proficiency-tier-select"
+                      aria-label="Select Proficiency Tier"
+                      value={selectedProficiency}
+                      onChange={(e) => {
+                        if (isSkillProficiencyTier(e.target.value)) {
+                          setSelectedProficiency(e.target.value);
+                        }
+                      }}
+                      className="bg-slate-900/80 text-xs text-white rounded-lg border border-white/15 px-3 py-2"
+                    >
+                      {PROFICIENCY_TIERS.map((tier) => (
+                        <option key={tier} value={tier}>
+                          {tier}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  data-testid="assign-validated-skill-button"
+                  disabled={!canAssignSkills}
+                  onClick={handleAssignValidatedSkill}
+                  title={
+                    canAssignSkills
+                      ? 'Directly assign and validate skill proficiency'
+                      : 'Read-Only Viewer cannot mutate validated skills'
+                  }
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition ${
+                    canAssignSkills
+                      ? 'bg-indigo-500/25 border-indigo-400/40 text-indigo-100 hover:bg-indigo-500/35'
+                      : 'bg-slate-800/60 border-white/10 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Assign Validated Skill</span>
+                </button>
+              </div>
+
+              {/* Individual Skill Matrix Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-white/15 text-xs uppercase text-slate-400">
+                      <th className="py-3 px-3">Employee</th>
+                      <th className="py-3 px-3">Workday Title &amp; Department</th>
+                      <th className="py-3 px-3">Validated Skill Proficiencies</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {directoryEntries
+                      .filter((p) => p.employmentStatus === 'Active')
+                      .map((person) => {
+                        const skills = employeeSkills[person.fullName] ?? [];
+                        return (
+                          <tr
+                            key={person.employeeId}
+                            data-testid={`skill-matrix-row-${person.fullName}`}
+                            className="bg-slate-900/75 hover:bg-white/5 transition"
+                          >
+                            <td className="py-3 px-3 font-medium text-white">
+                              {person.fullName}
+                            </td>
+                            <td className="py-3 px-3 text-slate-300">
+                              {person.jobTitle} • {person.department}
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="flex flex-wrap gap-2">
+                                {skills.map((item) => (
+                                  <span
+                                    key={item.skillName}
+                                    className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/35 text-indigo-200"
+                                  >
+                                    {item.skillName}: {item.proficiency}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Workday System-of-Record Employee Directory Projection Panel */}

@@ -12,7 +12,7 @@
 
 ---
 
-- [~] **Track: Track 03 — RBAC Personas, Skill & Role Catalog & Direct Validated Skill Tagging**
+- [x] **Track: Track 03 — RBAC Personas, Skill & Role Catalog & Direct Validated Skill Tagging**
   *Link: [./tracks/track_03_rbac_skill_role_catalog/index.md](./tracks/track_03_rbac_skill_role_catalog/index.md)*
 
 ---
