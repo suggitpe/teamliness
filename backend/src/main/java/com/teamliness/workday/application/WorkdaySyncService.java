@@ -110,13 +110,13 @@ public class WorkdaySyncService {
 
         for (String localEmpId : allLocalEmployeeIds) {
             if (!activeIncomingEmployeeIds.contains(localEmpId)) {
-                boolean AlreadyCountedInIncoming = incomingRecords.stream()
+                boolean alreadyCountedInIncoming = incomingRecords.stream()
                         .anyMatch(r -> r.employeeId().equals(localEmpId));
                 jdbcTemplate.update(
                         "UPDATE persons SET employment_status = 'Inactive', last_synced_at = CURRENT_TIMESTAMP WHERE employee_id = ?",
                         localEmpId
                 );
-                if (!AlreadyCountedInIncoming) {
+                if (!alreadyCountedInIncoming) {
                     deactivatedCount++;
                 }
             }

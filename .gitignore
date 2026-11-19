@@ -9,9 +9,9 @@ frontend/coverage/
 
 # intellij
 .idea/
-out/
+/out/
 *.iml
-target/
+/target/
 
 # eclipse
 .classpath
