@@ -2,7 +2,7 @@
 
 ---
 
-- [ ] **Track: Track 01 — Project Foundation, Glassmorphic Shell & ATDD HTML Living Docs Harness**
+- [x] **Track: Track 01 — Project Foundation, Glassmorphic Shell & ATDD HTML Living Docs Harness**
   *Link: [./tracks/track_01_foundation_atdd_harness/index.md](./tracks/track_01_foundation_atdd_harness/index.md)*
 
 ---

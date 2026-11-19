@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teamliness Frontend — ATDD HTML Living Documentation</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.16), transparent 45%),
+                  radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.18), transparent 50%),
+                  #020617;
+      color: #f1f5f9;
+      padding: 2rem;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header-card, .feature-card, .results-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+    h1 { margin: 0 0 0.5rem 0; font-size: 1.6rem; color: #38bdf8; }
+    h2 { margin: 0.25rem 0 0.75rem 0; font-size: 1.15rem; color: #e2e8f0; }
+    .summary-bar { display: flex; gap: 1rem; margin-top: 1rem; }
+    .metric {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+    }
+    .badge-spec {
+      display: inline-block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(56, 189, 248, 0.18);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 999px;
+      padding: 0.2rem 0.65rem;
+    }
+    .gherkin-source {
+      background: rgba(2, 6, 23, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+      color: #cbd5e1;
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+    th, td {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .status-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-fail {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header-card">
+      <h1>Teamliness Frontend — Specification by Example (ATDD) Living Documentation</h1>
+      <p>Generated automatically from executable Gherkin specifications and single-run Vitest BDD verification.</p>
+      <div class="summary-bar">
+        <div class="metric"><strong>Features:</strong> 1</div>
+        <div class="metric"><strong>Scenarios Passed:</strong> 6</div>
+        <div class="metric"><strong>Scenarios Failed:</strong> 0</div>
+      </div>
+    </header>
+    
+        <section class="feature-card">
+          <div class="feature-header">
+            <span class="badge-spec">Gherkin Specification</span>
+            <h2>track_01_glassmorphic_shell.feature</h2>
+          </div>
+          <pre class="gherkin-source">Feature: Track 01 — Glassmorphic Operational Workspace Shell &amp; Living Docs Navigation
+  As an engineering or operational leader
+  I want the Teamliness Single-Page Application to render a high-contrast Glassmorphic workspace shell with navigation and system status indicators
+  So that I can navigate between Team Composition, Skill Matrix, Outcome Commitments, and Diagnostics with immediate situational awareness.
+
+  Rule: The Glassmorphic application shell renders translucent surfaces, ambient mesh backdrop, and primary navigation
+
+    Scenario: Glassmorphic workspace shell renders with navigation and living-docs link
+      Given a leader opens the Teamliness SPA workspace
+      Then the ambient radial mesh gradient canvas and Glassmorphic header with "backdrop-blur" styling are rendered
+      And the active RBAC persona badge displays "Org Leader"
+      And the Living Documentation status link is visible in the workspace header
+
+    Scenario Outline: Primary workspace navigation items render with their operational view descriptions
+      Given a leader opens the Teamliness SPA workspace
+      When the leader selects the "&lt;nav_label&gt;" navigation tab
+      Then the workspace main panel displays the "&lt;section_heading&gt;" view with glassmorphic surface elevation
+
+      Examples:
+        | nav_label            | section_heading                              |
+        | Team Composition     | Hierarchical Org Units &amp; Team Composition    |
+        | Skill Matrix         | Individual &amp; Team-Aggregated Skill Matrix    |
+        | Outcome Commitments  | Outcome Commitments &amp; Jira Execution Links   |
+        | Health Diagnostics   | Organisational &amp; Capacity Health Diagnostics |
+</pre>
+        </section>
+    <section class="results-card">
+      <h2>Executed ATDD &amp; Component Verification Scenarios</h2>
+      <table>
+        <thead>
+          <tr><th>Scenario / Example</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario: Glassmorphic workspace shell renders with navigation and living-docs link</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario: Switching the RBAC persona updates the active persona badge in the glassmorphic header</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario Outline: Navigating to "'Team Composition'" renders "'Hierarchical Org Units & Team Composi…'" with glassmorphic surface elevation</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario Outline: Navigating to "'Skill Matrix'" renders "'Individual & Team-Aggregated Skill Ma…'" with glassmorphic surface elevation</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario Outline: Navigating to "'Outcome Commitments'" renders "'Outcome Commitments & Jira Execution …'" with glassmorphic surface elevation</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Feature: Track 01 — Glassmorphic Operational Workspace Shell & Living Docs Navigation > Scenario Outline: Navigating to "'Health Diagnostics'" renders "'Organisational & Capacity Health Diag…'" with glassmorphic surface elevation</td>
+          <td>
+            <span class="status-pill status-pass">
+              PASS
+            </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

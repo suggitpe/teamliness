@@ -1,0 +1,95 @@
+name: Teamliness Full CI & ATDD Living Documentation
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-ci-and-living-docs:
+    name: Backend CI (Java 21, Flyway, Cucumber ATDD & JaCoCo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 LTS
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle with Caching
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run Backend Unit + Cucumber ATDD Tests & JaCoCo Coverage (Single-Run)
+        run: ./gradlew check jacocoTestReport --no-daemon
+
+      - name: Upload Backend ATDD HTML Living Documentation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-atdd-living-docs
+          path: backend/build/reports/living-docs/
+          retention-days: 14
+
+      - name: Upload Backend JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jacoco-coverage
+          path: backend/build/reports/jacoco/test/html/
+          retention-days: 14
+
+  frontend-ci-and-living-docs:
+    name: Frontend CI (TypeScript, Vite Build, Vitest ATDD & Living Docs)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Strict Type Check
+        run: npm run lint
+
+      - name: Run Single-Run Vitest ATDD Suite, Coverage & HTML Living Docs Generation
+        run: npm test -- --coverage
+
+      - name: Verify Production Vite Bundle Build
+        run: npm run build
+
+      - name: Upload Frontend ATDD HTML Living Documentation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-atdd-living-docs
+          path: frontend/reports/living-docs/
+          retention-days: 14
