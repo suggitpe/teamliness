@@ -1,13 +1,13 @@
 # Implementation Plan: Track 03 — RBAC Personas, Skill & Role Catalog & Direct Validated Skill Tagging (`track_03_rbac_skill_role_catalog`)
 
-## Phase 1: Specification by Example Authoring & RBAC + Skill Catalog Slice
-- [x] Task: Author Track 03 Gherkin Specifications by Example & Complete HITL Gate 1 Sign-Off
+## Phase 1: Specification by Example Authoring & RBAC + Skill Catalog Slice [checkpoint: c099cad]
+- [x] Task: Author Track 03 Gherkin Specifications by Example & Complete HITL Gate 1 Sign-Off `c099cad`
   - [x] Draft `backend/src/test/resources/features/track_03_rbac_and_skills.feature` and `frontend/src/features/track_03_persona_and_skill_matrix.feature` with RBAC permission decision tables
   - [x] **HITL Gate 1:** Present the Gherkin Specification by Example scenarios to the user and obtain explicit approval before implementation
-- [x] Task: Implement RBAC Security Filter, Role/Skill Catalogs, Direct Skill Assignment & Glassmorphic Individual Skill Matrix (ATDD + TDD)
+- [x] Task: Implement RBAC Security Filter, Role/Skill Catalogs, Direct Skill Assignment & Glassmorphic Individual Skill Matrix (ATDD + TDD) `c099cad`
   - [x] Wire failing Cucumber step definitions and unit tests for RBAC persona headers (`X-Persona-Role`, `X-Person-Id`), catalog CRUD, and direct validated skill assignment
   - [x] Implement backend RBAC filter, Catalog & PersonSkill services/controllers, and Frontend Persona Switcher + Glassmorphic Individual Skill Matrix View
-- [x] Task: Track 03 Verification, HTML Living Docs Inspection & HITL Gate 2 Sign-Off (Refer to workflow.md)
+- [x] Task: Track 03 Verification, HTML Living Docs Inspection & HITL Gate 2 Sign-Off (Refer to workflow.md) `c099cad`
 
-## Phase: Review Fixes
-- [x] Task: Apply review suggestions (proficiency validation, in-place skill update & GET /api/v1/persons/{id}/skills ATDD coverage)
+## Phase: Review Fixes [checkpoint: c099cad]
+- [x] Task: Apply review suggestions (proficiency validation, in-place skill update & GET /api/v1/persons/{id}/skills ATDD coverage) `c099cad`
